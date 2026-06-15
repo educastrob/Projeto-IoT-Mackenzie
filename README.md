@@ -2,7 +2,7 @@
 
 Este repositório contém o código-fonte, esquemáticos de hardware e a documentação completa do protótipo desenvolvido para a disciplina de Internet das Coisas na Universidade Presbiteriana Mackenzie.
 
-## 📖 1. Descrição do Projeto e Funcionamento
+## 1. Descrição do Projeto e Funcionamento
 O projeto consiste em um nó sensor inteligente voltado para a detecção de ocupação de vagas públicas de estacionamento em tempo real. O sistema utiliza um sensor óptico reflexivo infravermelho para analisar a presença física de um veículo. Ao sofrer alteração de estado, o microcontrolador aciona atuadores de sinalização local (LEDs indicativos) e realiza a transmissão telemétrica via rede TCP/IP utilizando o protocolo MQTT para uma central de tráfego.
 
 ### Como reproduzir este projeto:
