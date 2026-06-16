@@ -1,31 +1,81 @@
-# Sistema IoT para Monitoramento de Estacionamento Público (ODS 11)
+# Sistema de Monitoramento de Vagas de Estacionamento com IoT e MQTT
 
-Este repositório contém o código-fonte, esquemáticos de hardware e a documentação completa do protótipo desenvolvido para a disciplina de Internet das Coisas na Universidade Presbiteriana Mackenzie.
+**Autores:** Eduardo Castro Brito (RA: [10423956])
+**Universidade Presbiteriana Mackenzie** - Faculdade de Computação e Informática  
+**Disciplina:** Internet das Coisas | Junho de 2026
 
-## 1. Descrição do Projeto e Funcionamento
-O projeto consiste em um nó sensor inteligente voltado para a detecção de ocupação de vagas públicas de estacionamento em tempo real. O sistema utiliza um sensor óptico reflexivo infravermelho para analisar a presença física de um veículo. Ao sofrer alteração de estado, o microcontrolador aciona atuadores de sinalização local (LEDs indicativos) e realiza a transmissão telemétrica via rede TCP/IP utilizando o protocolo MQTT para uma central de tráfego.
+## Simulação Wokwi
 
-### Como reproduzir este projeto:
-1. Monte o circuito elétrico conforme os diagramas da pasta `/hardware`.
-2. Abra a pasta `/software` na IDE do Arduino.
-3. Instale as bibliotecas `WiFi.h` e `PubSubClient.h`.
-4. Altere as credenciais de `ssid` e `password` no arquivo `.ino` para os dados da sua rede local.
-5. Realize o upload para a placa ESP32 e monitore as publicações no broker através do painel HiveMQ.
+https://wokwi.com/projects/466923078597139457
 
-## 2. Especificação do Hardware Utilizado
-* **Plataforma de Desenvolvimento:** Módulo ESP32 DevKit V1 (Processador Dual-Core Xtensa LX6 de 32 bits, clock de 240MHz, Wi-Fi nativo).
-* **Sensor:** Sensor de Obstáculo Infravermelho TCRT5000 (Princípio reflexivo com comparador integrado LM393).
-* **Atuadores:** 1x LED Difuso Verde 5mm, 1x LED Difuso Vermelho 5mm, 2x Resistores de Película de Carbono de 330 Ohms.
-* **Infraestrutura de encapsulamento (Opcional/Case):** O protótipo foi projetado para ser acondicionado em uma caixa protetora de ABS com dimensões estimadas de 10cm x 6cm x 4cm para proteção contra intempéries urbanas.
+## Descrição
 
-## 3. Software e Documentação de Código
-O algoritmo foi desenvolvido em linguagem C/C++ focado em arquitetura assíncrona não-bloqueante para evitar gargalos na varredura periférica durante quedas de rede. 
-* O código-fonte documentado linha por linha encontra-se disponível no arquivo: `/software/estacionamento_iot.ino`.
+Sistema embarcado para monitoramento contínuo e detecção de ocupação de vagas públicas de estacionamento em tempo real usando ESP32 e sensor óptico reflexivo infravermelho TCRT5000, com feedback visual em LEDs indicativos e comunicação bidirecional via protocolo MQTT com broker HiveMQ. Projeto alinhado à ODS 11 - Cidades e Comunidades Sustentáveis.
 
-## 4. Interfaces, Protocolos e Módulos de Comunicação
-* **Camada de Rede:** TCP/IP via módulo de rádio Wi-Fi 802.11 b/g/n integrado do ESP32.
-* **Protocolo de Aplicação:** MQTT (Message Queuing Telemetry Transport) operando em arquitetura Publish/Subscribe.
-* **Porta de Conexão:** 1883 (TCP puro para o cliente embarcado).
-* **Broker Utilizado:** `broker.hivemq.com`
-* **Estrutura de Tópico:** `cidade/mobilidade/estacionamento/vaga01`
-* **Payload de Mensagem:** Formato JSON leve (ex: `{"vaga": 1, "status": "ocupada"}`).
+## Como Reproduzir o Projeto
+
+1. Acesse https://wokwi.com e crie um novo projeto ESP32 (ou monte fisicamente na bancada).
+2. Adicione os componentes: Sensor TCRT5000 (ou Slide Switch na simulação), LED Verde, LED Vermelho e 2x Resistores de 330 Ohms.
+3. Conecte conforme a pinagem abaixo.
+4. Cole o código do arquivo `estacionamento_iot.ino`.
+5. No gerenciador de bibliotecas da IDE (or em `libraries.txt` no Wokwi) adicione: `PubSubClient`.
+6. Altere as credenciais de `ssid` e `password` para a sua rede real (se usar hardware físico).
+7. Clique em Play para simular ou faça o Upload para a placa física.
+8. Abra https://www.hivemq.com/demos/websocket-client/.
+9. Conecte e dê *Subscribe* em: `cidade/mobilidade/estacionamento/vaga01` e veja os dados chegando em tempo real!
+10. Para testar o comando remoto (*Subscribe*), envie a string `LED_VERMELHO_ON` ou `LED_VERMELHO_OFF` no tópico `cidade/mobilidade/estacionamento/vaga01/cmd`.
+
+## Componentes Utilizados
+
+| Componente | Especificação | Função |
+| :--- | :--- | :--- |
+| **ESP32** | WiFi integrado, 240 MHz, Dual-Core | Comunicação WiFi e pilha de protocolos MQTT |
+| **TCRT5000** | Sensor óptico reflexivo IR, saída digital | Detecção física de presença do veículo na vaga |
+| **LED Verde** | Difuso, 5mm | Indicador visual de vaga LIVRE localmente |
+| **LED Vermelho** | Difuso, 5mm | Indicador visual de vaga OCUPADA localmente |
+| **Resistores** | Filme de Carbono, 330 Ohms | Limitação de corrente para proteção dos LEDs |
+
+## Pinagem - ESP32
+
+| Componente | Pino ESP32 | Observação |
+| :--- | :--- | :--- |
+| **TCRT5000 VCC** | 3V3 | Alimentação positiva do módulo |
+| **TCRT5000 GND** | GND | Referência de aterramento comum |
+| **TCRT5000 DO** | GPIO 12 | Entrada digital (Leitura do Sensor) |
+| **LED Verde** | GPIO 22 | Saída digital (Controle do LED Verde) |
+| **LED Vermelho** | GPIO 16 | Saída digital (Controle do LED Vermelho) |
+| **Resistores** | GND | Ligados em série com o catodo dos LEDs ao Terra |
+
+## Protocolo MQTT e Comunicação
+
+* **Broker:** HiveMQ público (broker.hivemq.com)
+* **Porta:** 1883
+* **Protocolo:** TCP/IP
+* **QoS:** nível 0
+* **Biblioteca:** PubSubClient (Nick O'Leary)
+* **WiFi:** rede `Wokwi-GUEST` (simulação) ou utilize rede real.
+
+## Tópicos MQTT
+
+| Tópico | Descrição | Unidade / Formato |
+| :--- | :--- | :--- |
+| `cidade/mobilidade/estacionamento/vaga01` | Envio de telemetria de status e métricas da vaga | String JSON estruturada |
+| `cidade/mobilidade/estacionamento/vaga01/cmd` | Escuta de comandos remotos vindos da central | String de texto puro (Comando) |
+
+## Lógica de Funcionamento
+
+* **Sensor em HIGH** = Sem obstáculo detectado = **Vaga LIVRE** = LED VERDE ativo + Cálculo do tempo total de permanência que o veículo anterior utilizou.
+* **Sensor em LOW** = Veículo detectado = **Vaga OCUPADA** = LED VERMELHO ativo + Inicialização do cronômetro interno (`millis()`).
+
+## Bibliotecas Necessárias
+
+* `WiFi.h` (Nativa do ecossistema ESP32)
+* `PubSubClient` (Nick O'Leary)
+
+## Observação sobre Simulação
+
+Na simulação do Wokwi foi utilizada uma chave seletora (*Slide Switch*) no lugar do sensor físico TCRT5000, visto que o comportamento elétrico digital de transição discreta de nível lógico (Alto/Baixo) reflete perfeitamente a lógica de interrupção por barreira física e funcionamento síncrono do hardware real de bancada.
+
+## Autor
+
+Eduardo Castro Brito
