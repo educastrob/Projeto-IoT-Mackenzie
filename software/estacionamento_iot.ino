@@ -21,7 +21,7 @@ PubSubClient client(espClient);
 int ultimoEstado = -1;
 unsigned long tempoInicioOcupado = 0;
 
-// Função de Callback: Executada automaticamente quando uma mensagem chega ao ESP32
+
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println("\n--------------------------------------------");
   Serial.print("📥 Mensagem MQTT Recebida no Tópico: ");
